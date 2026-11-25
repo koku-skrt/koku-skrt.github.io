@@ -65,11 +65,20 @@
     frame.src = WEB_APP_URL + window.location.search;
     document.getElementById("fallbackLink").href = WEB_APP_URL;
 
-    frame.addEventListener("load", function () { loading.classList.add("hidden"); });
+    // Skrin "Memuatkan" hanya ditutup apabila borang sendiri menghantar isyarat siap
+    // (window.top.postMessage dalam Index.html). Jika borang enggan dibenamkan, isyarat
+    // tidak akan sampai, jadi guru tidak nampak halaman kosong.
+    window.addEventListener("message", function (ev) {
+      var d = ev.data;
+      if (d && d.type === "elaporan-koku-ready") loading.classList.add("hidden");
+    });
 
-    // Jika lambat dimuatkan (talian perlahan atau web app enggan dibenamkan), tawar pautan terus
+    // Jika tiada isyarat (talian perlahan atau web app enggan dibenamkan), tawar pautan terus
     setTimeout(function () {
-      if (!loading.classList.contains("hidden")) document.getElementById("fallback").style.display = "block";
+      if (!loading.classList.contains("hidden")) {
+        document.querySelector("#loading .sub").innerText = "Borang mengambil masa terlalu lama untuk dimuatkan.";
+        document.getElementById("fallback").style.display = "block";
+      }
     }, 12000);
   </script>
 </body>
