@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- e-LAPORAN KOKU SKRT - Halaman pembalut GitHub Pages
+     Membenamkan web app Apps Script Laporan Mingguan supaya banner
+     "This application was created by a Google Apps Script user" tidak dipaparkan.
+     Untuk tukar web app, ubah nilai WEB_APP_URL di bawah sahaja. -->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#008b78">
+  <meta name="robots" content="noindex, nofollow">
+  <title>e-Laporan Koku SKRT</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23008b78'/%3E%3Cpath d='M20 18h24v4H20zm0 10h24v4H20zm0 10h16v4H20z' fill='%23fff'/%3E%3C/svg%3E">
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #f3f6f8; overflow: hidden; }
+    #app {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      border: 0; display: block;
+      background: #f3f6f8;
+    }
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      background: #f3f6f8; color: #22313f;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      transition: opacity .25s ease;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid #d6ebe7; border-top-color: #008b78;
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .title { font-weight: 800; letter-spacing: .3px; }
+    .sub { color: #6b7785; font-size: 14px; }
+    #fallback { display: none; margin-top: 6px; }
+    #fallback a {
+      display: inline-block; padding: 10px 18px; border-radius: 999px;
+      background: #008b78; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="title">SK RIMBA TERJUN</div>
+    <div class="sub">Memuatkan e-Laporan Mingguan Kokurikulum…</div>
+    <div id="fallback"><a id="fallbackLink" href="#" target="_top" rel="noopener">Buka terus borang laporan</a></div>
+  </div>
+
+  <iframe id="app" title="e-Laporan Mingguan Kokurikulum SK Rimba Terjun"
+          allow="clipboard-write; fullscreen"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+
+  <script>
+    // URL web app Apps Script (Laporan Mingguan). Tukar di sini jika deployment berubah.
+    var WEB_APP_URL = "https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbyeuyTP9IXMsWrqUNeEPJhGyH_S9lzD6YFFkHq7DlUR6WKPGcX-0C9A7280EJg6FGasZw/exec";
+
+    var frame = document.getElementById("app");
+    var loading = document.getElementById("loading");
+
+    // Hantar terus sebarang parameter URL (contoh ?minggu=18) kepada web app
+    frame.src = WEB_APP_URL + window.location.search;
+    document.getElementById("fallbackLink").href = WEB_APP_URL;
+
+    // Skrin "Memuatkan" hanya ditutup apabila borang sendiri menghantar isyarat siap
+    // (window.top.postMessage dalam Index.html). Jika borang enggan dibenamkan, isyarat
+    // tidak akan sampai, jadi guru tidak nampak halaman kosong.
+    window.addEventListener("message", function (ev) {
+      var d = ev.data;
+      if (d && d.type === "elaporan-koku-ready") loading.classList.add("hidden");
+    });
+
+    // Jika tiada isyarat (talian perlahan atau web app enggan dibenamkan), tawar pautan terus
+    setTimeout(function () {
+      if (!loading.classList.contains("hidden")) {
+        document.querySelector("#loading .sub").innerText = "Borang mengambil masa terlalu lama untuk dimuatkan.";
+        document.getElementById("fallback").style.display = "block";
+      }
+    }, 12000);
+  </script>
+</body>
+</html>
